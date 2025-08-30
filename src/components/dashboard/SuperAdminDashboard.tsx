@@ -11,6 +11,7 @@ interface SystemStats {
   totalTransactions: number;
   totalRevenue: number;
   activeUsers: number;
+  storageUsage: number;
   recentActivity: Array<{
     id: number;
     type: string;
@@ -167,7 +168,7 @@ const SuperAdminDashboard = () => {
               </div>
               <div className="flex justify-between items-center p-3 bg-warning/10 rounded-lg">
                 <span className="font-medium">Storage Usage</span>
-                <span className="text-warning font-semibold">75%</span>
+                <span className="text-warning font-semibold">{systemStats?.storageUsage || 0}%</span>
               </div>
             </div>
           </CardContent>

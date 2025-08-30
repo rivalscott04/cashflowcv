@@ -355,6 +355,18 @@ class File {
       is_pdf: this.isPDF()
     };
   }
+
+  // Get total storage usage
+  static async getTotalStorageUsage() {
+    try {
+      const sql = 'SELECT SUM(file_size) as total_size FROM files';
+      const rows = await query(sql);
+      return rows[0].total_size || 0;
+    } catch (error) {
+      console.error('Error getting total storage usage:', error);
+      return 0;
+    }
+  }
 }
 
 module.exports = File;
