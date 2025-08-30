@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const { pool } = require('../config/database');
 
 class Company {
   constructor(data) {
@@ -7,6 +7,7 @@ class Company {
     this.email = data.email;
     this.phone = data.phone;
     this.address = data.address;
+    this.website = data.website;
     this.logo_url = data.logo_url;
     this.is_active = data.is_active;
     this.subscription_plan = data.subscription_plan;
@@ -17,14 +18,14 @@ class Company {
 
   // Create a new company
   static async create(companyData) {
-    const { name, email, phone, address, logo_url, subscription_plan } = companyData;
+    const { name, email, phone, address, website, logo_url, subscription_plan } = companyData;
     
     const query = `
-      INSERT INTO companies (name, email, phone, address, logo_url, subscription_plan)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO companies (name, email, phone, address, website, logo_url, subscription_plan)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     
-    const [result] = await db.execute(query, [name, email, phone, address, logo_url, subscription_plan]);
+    const [result] = await pool.execute(query, [name, email, phone, address, website, logo_url, subscription_plan]);
     
     return this.findById(result.insertId);
   }
@@ -32,8 +33,7 @@ class Company {
   // Find company by ID
   static async findById(id) {
     const query = 'SELECT * FROM companies WHERE id = ?';
-    const [rows] = await db.execute(query, [id]);
-    
+    const [rows] = await pool.execute(query, [id]);
     if (rows.length === 0) {
       return null;
     }
@@ -44,7 +44,7 @@ class Company {
   // Find company by name
   static async findByName(name) {
     const query = 'SELECT * FROM companies WHERE name = ?';
-    const [rows] = await db.execute(query, [name]);
+    const [rows] = await pool.execute(query, [name]);
     
     if (rows.length === 0) {
       return null;
@@ -69,13 +69,26 @@ class Company {
       params.push(options.limit);
     }
     
-    const [rows] = await db.execute(query, params);
+    const [rows] = await pool.execute(query, params);
     return rows.map(row => new Company(row));
+  }
+
+  // Count companies
+  static async count(filters = {}) {
+    let query = 'SELECT COUNT(*) as total FROM companies';
+    const params = [];
+    
+    if (filters.active_only) {
+      query += ' WHERE is_active = TRUE';
+    }
+    
+    const [rows] = await pool.execute(query, params);
+    return rows[0].total;
   }
 
   // Update company
   static async update(id, updateData) {
-    const allowedFields = ['name', 'email', 'phone', 'address', 'logo_url', 'is_active', 'subscription_plan', 'subscription_expires_at'];
+    const allowedFields = ['name', 'email', 'phone', 'address', 'website', 'logo_url', 'is_active', 'subscription_plan', 'subscription_expires_at'];
     const fields = [];
     const values = [];
     
@@ -93,7 +106,7 @@ class Company {
     values.push(id);
     
     const query = `UPDATE companies SET ${fields.join(', ')} WHERE id = ?`;
-    await db.execute(query, values);
+    await pool.execute(query, values);
     
     return this.findById(id);
   }
@@ -101,7 +114,7 @@ class Company {
   // Delete company (soft delete by setting is_active to false)
   static async delete(id) {
     const query = 'UPDATE companies SET is_active = FALSE WHERE id = ?';
-    const [result] = await db.execute(query, [id]);
+    const [result] = await pool.execute(query, [id]);
     
     return result.affectedRows > 0;
   }
@@ -109,7 +122,7 @@ class Company {
   // Hard delete company (permanent deletion)
   static async hardDelete(id) {
     const query = 'DELETE FROM companies WHERE id = ?';
-    const [result] = await db.execute(query, [id]);
+    const [result] = await pool.execute(query, [id]);
     
     return result.affectedRows > 0;
   }
@@ -126,7 +139,7 @@ class Company {
     const stats = {};
     
     for (const [key, query] of Object.entries(queries)) {
-      const [rows] = await db.execute(query, [companyId]);
+      const [rows] = await pool.execute(query, [companyId]);
       stats[key] = rows[0].count || rows[0].total || 0;
     }
     
@@ -136,7 +149,7 @@ class Company {
   // Check if company exists and is active
   static async isActive(id) {
     const query = 'SELECT is_active FROM companies WHERE id = ?';
-    const [rows] = await db.execute(query, [id]);
+    const [rows] = await pool.execute(query, [id]);
     
     return rows.length > 0 && rows[0].is_active;
   }
@@ -144,7 +157,7 @@ class Company {
   // Get company settings
   async getSettings() {
     const query = 'SELECT * FROM company_settings WHERE company_id = ?';
-    const [rows] = await db.execute(query, [this.id]);
+    const [rows] = await pool.execute(query, [this.id]);
     
     const settings = {};
     rows.forEach(row => {
@@ -193,7 +206,7 @@ class Company {
       setting_type = VALUES(setting_type)
     `;
     
-    await db.execute(query, [this.id, key, stringValue, type]);
+    await pool.execute(query, [this.id, key, stringValue, type]);
   }
 }
 

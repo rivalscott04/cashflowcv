@@ -11,6 +11,7 @@ const authRoutes = require('../routes/auth');
 const transactionRoutes = require('../routes/transactions');
 const fileRoutes = require('../routes/files');
 const companyRoutes = require('../routes/companies');
+const userRoutes = require('../routes/users');
 const errorHandler = require('../middleware/errorHandler');
 const { notFound } = require('../middleware/notFound');
 
@@ -72,8 +73,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/companies', companyRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/settings', require('../routes/settings'));
 app.use('/api/reports', require('../routes/reports'));
+app.use('/api/dashboard', require('../routes/dashboard'));
 
 // 404 handler
 app.use(notFound);

@@ -57,7 +57,7 @@ const executeMigration = async (connection, filename) => {
   
   for (const statement of statements) {
     if (statement.trim()) {
-      await connection.execute(statement);
+      await connection.query(statement);
     }
   }
   

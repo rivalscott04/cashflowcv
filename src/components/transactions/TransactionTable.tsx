@@ -64,7 +64,7 @@ const TransactionTable = ({ onEdit }: TransactionTableProps) => {
     }
   ];
 
-  const filteredTransactions = transactions?.filter(transaction =>
+  const filteredTransactions = transactions?.data?.transactions?.filter(transaction =>
     transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     transaction.category.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
@@ -197,7 +197,7 @@ const TransactionTable = ({ onEdit }: TransactionTableProps) => {
                           size="sm"
                           variant="ghost"
                           onClick={() => onEdit?.(transaction)}
-                          className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110 group"
+                          className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110 group cursor-pointer"
                         >
                           <Edit className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                         </Button>

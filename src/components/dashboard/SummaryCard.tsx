@@ -6,20 +6,25 @@ interface SummaryCardProps {
   title: string;
   amount: number;
   icon: LucideIcon;
-  variant: "income" | "expense" | "profit";
+  variant: "income" | "expense" | "profit" | "info";
   trend?: {
     value: number;
     isPositive: boolean;
   };
+  isCount?: boolean;
 }
 
-const SummaryCard = ({ title, amount, icon: Icon, variant, trend }: SummaryCardProps) => {
+const SummaryCard = ({ title, amount, icon: Icon, variant, trend, isCount = false }: SummaryCardProps) => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(value);
+  };
+
+  const formatCount = (value: number) => {
+    return new Intl.NumberFormat('id-ID').format(value);
   };
 
   const getVariantStyles = () => {
@@ -30,6 +35,8 @@ const SummaryCard = ({ title, amount, icon: Icon, variant, trend }: SummaryCardP
         return "border-error/20 bg-error-background";
       case "profit":
         return "border-primary/20 bg-gradient-card";
+      case "info":
+        return "border-blue-500/20 bg-blue-50 dark:bg-blue-950/20";
       default:
         return "";
     }
@@ -43,6 +50,8 @@ const SummaryCard = ({ title, amount, icon: Icon, variant, trend }: SummaryCardP
         return "text-error bg-error/10";
       case "profit":
         return "text-primary bg-primary/10";
+      case "info":
+        return "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30";
       default:
         return "";
     }
@@ -57,7 +66,9 @@ const SummaryCard = ({ title, amount, icon: Icon, variant, trend }: SummaryCardP
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-foreground">{formatCurrency(amount)}</div>
+        <div className="text-2xl font-bold text-foreground">
+          {isCount ? formatCount(amount) : formatCurrency(amount)}
+        </div>
         {trend && (
           <p className={cn(
             "text-xs mt-1",

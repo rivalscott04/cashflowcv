@@ -120,12 +120,25 @@ const updateCompanySetting = async (req, res, next) => {
     const { key } = req.params;
     const { value, type = 'string' } = req.body;
 
-    // Check if user is admin
-    if (req.user.role !== 'admin') {
+    // Check if user is admin or superadmin
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
       return res.status(403).json({
         success: false,
         error: {
-          message: 'Access denied. Admin role required.'
+          message: 'Access denied. Admin or Superadmin role required.'
+        }
+      });
+    }
+
+    // Get company_id from user
+    const companyId = req.user.company_id;
+    
+    // If user is superadmin (no company_id), return error
+    if (!companyId) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          message: 'Superadmin cannot update company settings. Please login as company admin.'
         }
       });
     }
@@ -150,7 +163,7 @@ const updateCompanySetting = async (req, res, next) => {
       });
     }
 
-    const setting = await CompanySettings.updateByKey(key, value, type);
+    const setting = await CompanySettings.updateByKey(key, value, type, null, companyId);
 
     res.status(200).json({
       success: true,

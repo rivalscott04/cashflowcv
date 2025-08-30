@@ -31,8 +31,8 @@ export const useDashboardSummary = (dateRange?: { startDate?: string; endDate?: 
   return useQuery({
     queryKey: ['dashboard-summary', dateRange],
     queryFn: async (): Promise<DashboardSummary> => {
-      const response = await api.transactions.getSummary(dateRange);
-      return response.data;
+      const response = await api.dashboard.getCompanyDashboard(dateRange);
+      return response.data.summary;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
@@ -44,12 +44,8 @@ export const useRecentTransactions = (limit: number = 4) => {
   return useQuery({
     queryKey: ['recent-transactions', limit],
     queryFn: async (): Promise<RecentTransaction[]> => {
-      const response = await api.transactions.getAll({ 
-        limit, 
-        sortBy: 'date', 
-        sortOrder: 'desc' 
-      });
-      return response.data.transactions;
+      const response = await api.dashboard.getCompanyDashboard();
+      return response.data.recentTransactions || [];
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
@@ -63,11 +59,7 @@ export const useMonthlyChartData = (year?: number) => {
   return useQuery({
     queryKey: ['monthly-chart-data', currentYear],
     queryFn: async (): Promise<MonthlyData[]> => {
-      const response = await api.transactions.getSummary({
-        startDate: `${currentYear}-01-01`,
-        endDate: `${currentYear}-12-31`,
-        groupBy: 'month'
-      });
+      const response = await api.dashboard.getCompanyDashboard();
       return response.data.monthlyData || [];
     },
     staleTime: 10 * 60 * 1000, // 10 minutes

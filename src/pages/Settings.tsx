@@ -21,7 +21,8 @@ const Settings = () => {
     npwp: '',
     address: '',
     phone: '',
-    email: ''
+    email: '',
+    website: ''
   });
   const [companyHeader, setCompanyHeader] = useState({
     header_company_name: '',
@@ -60,18 +61,24 @@ const Settings = () => {
       // Load company settings
       const companyResponse = await api.settings.getCompanySettings();
       const companySettingsMap: { [key: string]: any } = {};
-      companyResponse.data.settings.forEach(setting => {
-        companySettingsMap[setting.key] = setting.value;
-      });
+      
+      // Check if user has company_id (not superadmin)
+      if (userResponse.data.user.company_id) {
+        companyResponse.data.settings.forEach(setting => {
+          companySettingsMap[setting.key] = setting.value;
+        });
+      }
+      
       setCompanySettings(companySettingsMap);
       
       // Set company data from settings
       setCompanyData({
-        company_name: companySettingsMap.company_name || 'Sasambo Solusi Digital',
-        npwp: companySettingsMap.npwp || '01.234.567.8-901.000',
-        address: companySettingsMap.address || 'Jl. Teknologi Digital No. 123, Jakarta Selatan, DKI Jakarta 12345',
-        phone: companySettingsMap.phone || '+62 21 1234 5678',
-        email: companySettingsMap.email || 'info@sasambo.com'
+        company_name: companySettingsMap.company_name || '',
+        npwp: companySettingsMap.npwp || '',
+        address: companySettingsMap.address || '',
+        phone: companySettingsMap.phone || '',
+        email: companySettingsMap.email || '',
+        website: companySettingsMap.website || ''
       });
       
       // Set company header data from settings
@@ -111,7 +118,8 @@ const Settings = () => {
         api.settings.updateCompanySetting('npwp', companyData.npwp),
         api.settings.updateCompanySetting('address', companyData.address),
         api.settings.updateCompanySetting('phone', companyData.phone),
-        api.settings.updateCompanySetting('email', companyData.email)
+        api.settings.updateCompanySetting('email', companyData.email),
+        api.settings.updateCompanySetting('website', companyData.website)
       ]);
       
       toast({
@@ -259,6 +267,19 @@ const Settings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {!user?.company_id && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <h4 className="font-medium text-blue-900">Superadmin Mode</h4>
+                      <p className="text-sm text-blue-700">
+                        Anda login sebagai Superadmin. Pengaturan perusahaan hanya dapat diubah oleh Admin perusahaan masing-masing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="company-name">Nama Perusahaan</Label>
@@ -266,6 +287,7 @@ const Settings = () => {
                     id="company-name" 
                     value={companyData.company_name}
                     onChange={(e) => setCompanyData({...companyData, company_name: e.target.value})}
+                    disabled={!user?.company_id}
                   />
                 </div>
                 <div className="space-y-2">
@@ -274,6 +296,7 @@ const Settings = () => {
                     id="npwp" 
                     value={companyData.npwp}
                     onChange={(e) => setCompanyData({...companyData, npwp: e.target.value})}
+                    disabled={!user?.company_id}
                   />
                 </div>
               </div>
@@ -285,6 +308,7 @@ const Settings = () => {
                   value={companyData.address}
                   onChange={(e) => setCompanyData({...companyData, address: e.target.value})}
                   rows={3}
+                  disabled={!user?.company_id}
                 />
               </div>
 
@@ -295,6 +319,7 @@ const Settings = () => {
                     id="phone" 
                     value={companyData.phone}
                     onChange={(e) => setCompanyData({...companyData, phone: e.target.value})}
+                    disabled={!user?.company_id}
                   />
                 </div>
                 <div className="space-y-2">
@@ -304,6 +329,18 @@ const Settings = () => {
                     type="email" 
                     value={companyData.email}
                     onChange={(e) => setCompanyData({...companyData, email: e.target.value})}
+                    disabled={!user?.company_id}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input 
+                    id="website" 
+                    type="url" 
+                    value={companyData.website}
+                    onChange={(e) => setCompanyData({...companyData, website: e.target.value})}
+                    placeholder="https://example.com"
+                    disabled={!user?.company_id}
                   />
                 </div>
               </div>
@@ -311,10 +348,10 @@ const Settings = () => {
               <Button 
                 className="bg-gradient-primary" 
                 onClick={handleCompanySubmit}
-                disabled={loading}
+                disabled={loading || !user?.company_id}
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Simpan Perubahan
+                {!user?.company_id ? 'Hanya untuk Admin Perusahaan' : 'Simpan Perubahan'}
               </Button>
             </CardContent>
           </Card>
@@ -339,6 +376,7 @@ const Settings = () => {
                     value={companyHeader.header_company_name}
                     onChange={(e) => setCompanyHeader({...companyHeader, header_company_name: e.target.value})}
                     placeholder="Kosongkan untuk menggunakan nama perusahaan default"
+                    disabled={!user?.company_id}
                   />
                 </div>
                 <div className="space-y-2">
@@ -349,6 +387,7 @@ const Settings = () => {
                     value={companyHeader.header_email}
                     onChange={(e) => setCompanyHeader({...companyHeader, header_email: e.target.value})}
                     placeholder="Kosongkan untuk menggunakan email default"
+                    disabled={!user?.company_id}
                   />
                 </div>
               </div>
@@ -361,6 +400,7 @@ const Settings = () => {
                   onChange={(e) => setCompanyHeader({...companyHeader, header_address: e.target.value})}
                   rows={3}
                   placeholder="Kosongkan untuk menggunakan alamat default"
+                  disabled={!user?.company_id}
                 />
               </div>
 
@@ -371,16 +411,17 @@ const Settings = () => {
                   value={companyHeader.header_phone}
                   onChange={(e) => setCompanyHeader({...companyHeader, header_phone: e.target.value})}
                   placeholder="Kosongkan untuk menggunakan telepon default"
+                  disabled={!user?.company_id}
                 />
               </div>
 
               <Button 
                 className="bg-gradient-primary" 
                 onClick={handleCompanyHeaderSubmit}
-                disabled={loading}
+                disabled={loading || !user?.company_id}
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Simpan Kop Surat
+                {!user?.company_id ? 'Hanya untuk Admin Perusahaan' : 'Simpan Kop Surat'}
               </Button>
             </CardContent>
           </Card>

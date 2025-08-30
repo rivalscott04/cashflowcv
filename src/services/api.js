@@ -340,13 +340,166 @@ const reportsAPI = {
   }
 };
 
+// Users API
+export const usersAPI = {
+  getAll: async (params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    const response = await fetch(`${API_BASE_URL}/users?${queryParams}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getUsersByCompany: async (companyId, params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    const response = await fetch(`${API_BASE_URL}/users/company/${companyId}?${queryParams}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  create: async (userData) => {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: 'POST',
+      headers: createHeaders(),
+      body: JSON.stringify(userData),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id, userData) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: createHeaders(),
+      body: JSON.stringify(userData),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getGroupedByCompany: async (params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    const response = await fetch(`${API_BASE_URL}/users/grouped-by-company?${queryParams}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  }
+};
+
+// Companies API
+export const companiesAPI = {
+  getAll: async (params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    const response = await fetch(`${API_BASE_URL}/companies?${queryParams}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/companies/${id}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  create: async (companyData) => {
+    const response = await fetch(`${API_BASE_URL}/companies`, {
+      method: 'POST',
+      headers: createHeaders(),
+      body: JSON.stringify(companyData),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id, companyData) => {
+    const response = await fetch(`${API_BASE_URL}/companies/${id}`, {
+      method: 'PUT',
+      headers: createHeaders(),
+      body: JSON.stringify(companyData),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/companies/${id}`, {
+      method: 'DELETE',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getStats: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/companies/${id}/stats`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  }
+};
+
+// Dashboard API
+export const dashboardAPI = {
+  getSystemStats: async () => {
+    const response = await fetch(`${API_BASE_URL}/dashboard/system-stats`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getCompanyDashboard: async (params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    const response = await fetch(`${API_BASE_URL}/dashboard/company?${queryParams}`, {
+      method: 'GET',
+      headers: createHeaders(),
+    });
+    return handleResponse(response);
+  }
+};
+
+// System API
+export const systemAPI = {
+  getHealth: async () => {
+    const response = await fetch(`${API_BASE_URL}/../health`, {
+      method: 'GET',
+      headers: createHeaders(false),
+    });
+    return handleResponse(response);
+  }
+};
+
 // Export default API object
 const api = {
   auth: authAPI,
   transactions: transactionsAPI,
   files: filesAPI,
   settings: settingsAPI,
-  reports: reportsAPI
+  reports: reportsAPI,
+  users: usersAPI,
+  companies: companiesAPI,
+  dashboard: dashboardAPI,
+  system: systemAPI
 };
 
 export default api;

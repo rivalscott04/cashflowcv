@@ -9,6 +9,8 @@ import { Save, X, CheckCircle, Loader2 } from "lucide-react";
 import AnimatedButton from "@/components/ui/animated-button";
 import FileUpload from "@/components/ui/file-upload";
 import { useCreateTransaction, useTransactionCategories } from "@/hooks/useTransactions";
+import { parseFormattedNumber } from "@/utils/formatters";
+import { CurrencyInput } from "@/components/ui/currency-input";
 
 interface TransactionFormProps {
   onSubmit?: (data: any) => void;
@@ -29,6 +31,8 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
     invoiceFile: initialData?.invoiceFile || null,
     taxInvoiceFile: initialData?.taxInvoiceFile || null,
   });
+
+
   
   const createTransactionMutation = useCreateTransaction();
   const { data: categories, isLoading: categoriesLoading } = useTransactionCategories();
@@ -45,15 +49,15 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
       return;
     }
 
-    const transactionData = {
-      date: formData.date,
-      description: formData.description,
-      category: formData.category,
-      type: formData.type as "income" | "expense",
-      amount: parseFloat(formData.amount),
-      invoiceFile: formData.invoiceFile,
-      taxInvoiceFile: formData.taxInvoiceFile,
-    };
+         const transactionData = {
+       date: formData.date,
+       description: formData.description,
+       category: formData.category,
+       type: formData.type as "income" | "expense",
+       amount: parseFloat(parseFormattedNumber(formData.amount)),
+       invoiceFile: formData.invoiceFile,
+       taxInvoiceFile: formData.taxInvoiceFile,
+     };
     
     createTransactionMutation.mutate(transactionData, {
       onSuccess: () => {
@@ -108,19 +112,19 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full hover:border-primary/50 focus:border-primary transition-colors duration-200"
+                className="w-full hover:border-primary/50 focus:border-primary transition-colors duration-200 cursor-pointer"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="type">Jenis Transaksi</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger className="hover:border-primary/50 focus:border-primary transition-colors duration-200">
+                <SelectTrigger className="hover:border-primary/50 focus:border-primary transition-colors duration-200 cursor-pointer">
                   <SelectValue placeholder="Pilih jenis transaksi" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="income">Pendapatan</SelectItem>
-                  <SelectItem value="expense">Pengeluaran</SelectItem>
+                  <SelectItem value="income" className="cursor-pointer">Pendapatan</SelectItem>
+                  <SelectItem value="expense" className="cursor-pointer">Pengeluaran</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -133,7 +137,7 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
               placeholder="Masukkan deskripsi transaksi..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="hover:border-primary/50 focus:border-primary transition-colors duration-200"
+              className="hover:border-primary/50 focus:border-primary transition-colors duration-200 cursor-text"
               rows={3}
             />
           </div>
@@ -142,43 +146,42 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
             <div className="space-y-2">
               <Label htmlFor="category">Kategori</Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger className="hover:border-primary/50 focus:border-primary transition-colors duration-200">
+                <SelectTrigger className="hover:border-primary/50 focus:border-primary transition-colors duration-200 cursor-pointer">
                   <SelectValue placeholder={categoriesLoading ? "Memuat kategori..." : "Pilih kategori"} />
                 </SelectTrigger>
                 <SelectContent>
                   {categoriesLoading ? (
-                    <SelectItem value="loading" disabled>
-                      <div className="flex items-center space-x-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Memuat...</span>
-                      </div>
-                    </SelectItem>
+                                         <SelectItem value="loading-state" disabled className="cursor-not-allowed">
+                       <div className="flex items-center space-x-2">
+                         <Loader2 className="h-4 w-4 animate-spin" />
+                         <span>Memuat...</span>
+                       </div>
+                     </SelectItem>
                   ) : categories && categories.length > 0 ? (
                     categories.map((category) => (
-                      <SelectItem key={category.id} value={category.name}>
+                      <SelectItem key={category.id} value={category.name} className="cursor-pointer">
                         {category.name}
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="no-categories" disabled>
-                      Tidak ada kategori
-                    </SelectItem>
+                                         <SelectItem value="no-categories-available" disabled className="cursor-not-allowed">
+                       Tidak ada kategori
+                     </SelectItem>
                   )}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="amount">Jumlah (Rp)</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="0"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="w-full hover:border-primary/50 focus:border-primary transition-colors duration-200"
-              />
-            </div>
+                         <div className="space-y-2">
+               <Label htmlFor="amount">Jumlah (Rp)</Label>
+               <CurrencyInput
+                 id="amount"
+                 placeholder="0"
+                 value={formData.amount}
+                 onChange={(value) => setFormData({ ...formData, amount: value })}
+                 className="w-full hover:border-primary/50 focus:border-primary transition-colors duration-200 cursor-text"
+               />
+             </div>
           </div>
 
           {/* File Upload Section */}

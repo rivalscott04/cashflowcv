@@ -314,8 +314,78 @@ const deleteTransaction = async (req, res, next) => {
   }
 };
 
+// @desc    Get transaction summary
+// @route   GET /api/transactions/summary
+// @access  Private
+const getTransactionSummary = [
+  query('startDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Start date must be in valid ISO format'),
+  query('endDate')
+    .optional()
+    .isISO8601()
+    .withMessage('End date must be in valid ISO format'),
+  query('groupBy')
+    .optional()
+    .isIn(['month', 'year', 'day'])
+    .withMessage('Group by must be month, year, or day'),
+
+  async (req, res, next) => {
+    try {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: 'Validation failed',
+            details: errors.array()
+          }
+        });
+      }
+
+      const userId = req.user.id;
+      const { startDate, endDate, groupBy } = req.query;
+
+      // Get summary data
+      const summary = await Transaction.getSummaryByUserId(userId, {
+        startDate,
+        endDate
+      });
+
+      let responseData = {
+        totalIncome: summary.income.total,
+        totalExpense: summary.expense.total,
+        netProfit: summary.balance,
+        profitMargin: summary.income.total > 0 ? (summary.balance / summary.income.total) * 100 : 0,
+        incomeGrowth: 0, // TODO: Calculate growth
+        expenseGrowth: 0, // TODO: Calculate growth
+        profitGrowth: 0 // TODO: Calculate growth
+      };
+
+      // If groupBy is specified, get monthly data
+      if (groupBy === 'month' && startDate && endDate) {
+        const monthlyData = await Transaction.getMonthlyDataByUserId(userId, {
+          startDate,
+          endDate
+        });
+        responseData.monthlyData = monthlyData;
+      }
+
+      res.json({
+        success: true,
+        data: responseData
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+];
+
 // Routes
 router.get('/', protect, getTransactions);
+router.get('/summary', protect, getTransactionSummary);
 router.get('/:id', protect, getTransaction);
 router.post('/', protect, createTransaction);
 router.put('/:id', protect, updateTransaction);

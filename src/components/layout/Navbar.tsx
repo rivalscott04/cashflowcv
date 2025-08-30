@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Calculator, FileText, Settings, PlusCircle, Menu, X, LogOut, User } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BarChart3, Calculator, FileText, Settings, PlusCircle, Menu, X, LogOut, User, Users, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -33,16 +34,21 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center space-x-2">
               <BarChart3 className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-foreground">Sasambo Solusi Digital</span>
+              {user?.role !== 'superadmin' && (
+                <span className="text-xl font-bold text-foreground">Sasambo Solusi Digital</span>
+              )}
+              {user?.role === 'superadmin' && (
+                <span className="text-xl font-bold text-foreground">Cash Tracker</span>
+              )}
             </Link>
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/">
+            <Link to="/dashboard">
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group"
+                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group cursor-pointer"
               >
                 <BarChart3 className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                 <span>Dashboard</span>
@@ -52,7 +58,7 @@ const Navbar = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group"
+                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group cursor-pointer"
               >
                 <Calculator className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                 <span>Transaksi</span>
@@ -62,7 +68,7 @@ const Navbar = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group"
+                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group cursor-pointer"
               >
                 <FileText className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                 <span>Laporan</span>
@@ -72,44 +78,64 @@ const Navbar = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group"
+                className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group cursor-pointer"
               >
                 <Settings className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
                 <span>Pengaturan</span>
               </Button>
             </Link>
+            {user?.role === 'superadmin' && (
+              <Link to="/users">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center space-x-2 hover:scale-105 hover:bg-primary/10 transition-all duration-200 group cursor-pointer"
+                >
+                  <Users className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                  <span>User Management</span>
+                </Button>
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link to="/transactions/new" className="hidden sm:block">
-              <Button className="flex items-center space-x-2 hover:scale-105 active:scale-95 transition-all duration-200 bg-gradient-primary shadow-lg hover:shadow-primary/25 group">
-                <PlusCircle className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300" />
-                <span>Tambah Transaksi</span>
-              </Button>
-            </Link>
             
-            {/* User info and logout */}
-            <div className="hidden md:flex items-center space-x-2">
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                <span>{user?.full_name || 'User'}</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="flex items-center space-x-2 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </Button>
+            {/* User dropdown */}
+            <div className="hidden md:flex items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2 hover:bg-accent cursor-pointer">
+                    <User className="h-4 w-4" />
+                    <span className="text-sm">{user?.full_name || 'User'}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user?.full_name || 'User'}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email || 'No email'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        Role: {user?.role || 'Unknown'}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
             {/* Mobile menu button */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="md:hidden cursor-pointer"
               onClick={toggleMobileMenu}
             >
               {isMobileMenuOpen ? (
@@ -125,11 +151,11 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-card border-t border-border">
-              <Link to="/" onClick={closeMobileMenu}>
+              <Link to="/dashboard" onClick={closeMobileMenu}>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200"
+                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200 cursor-pointer"
                 >
                   <BarChart3 className="h-4 w-4" />
                   <span>Dashboard</span>
@@ -139,7 +165,7 @@ const Navbar = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200"
+                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200 cursor-pointer"
                 >
                   <Calculator className="h-4 w-4" />
                   <span>Transaksi</span>
@@ -149,7 +175,7 @@ const Navbar = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200"
+                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200 cursor-pointer"
                 >
                   <FileText className="h-4 w-4" />
                   <span>Laporan</span>
@@ -159,24 +185,38 @@ const Navbar = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200"
+                  className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200 cursor-pointer"
                 >
                   <Settings className="h-4 w-4" />
                   <span>Pengaturan</span>
                 </Button>
               </Link>
-              <Link to="/transactions/new" onClick={closeMobileMenu}>
-                <Button className="w-full justify-start flex items-center space-x-2 bg-gradient-primary shadow-lg hover:shadow-primary/25 mt-2">
-                  <PlusCircle className="h-4 w-4" />
-                  <span>Tambah Transaksi</span>
-                </Button>
-              </Link>
+              {user?.role === 'superadmin' && (
+                <Link to="/users" onClick={closeMobileMenu}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start flex items-center space-x-2 hover:bg-primary/10 transition-all duration-200 cursor-pointer"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>User Management</span>
+                  </Button>
+                </Link>
+              )}
+
               
               {/* Mobile user info and logout */}
               <div className="border-t border-border pt-2 mt-2">
-                <div className="flex items-center space-x-2 px-3 py-2 text-sm text-muted-foreground">
-                  <User className="h-4 w-4" />
-                  <span>{user?.full_name || 'User'}</span>
+                <div className="px-3 py-2">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{user?.full_name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user?.email || 'No email'}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      Role: {user?.role || 'Unknown'}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -185,7 +225,7 @@ const Navbar = () => {
                     closeMobileMenu();
                     handleLogout();
                   }}
-                  className="w-full justify-start flex items-center space-x-2 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+                  className="w-full justify-start flex items-center space-x-2 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Logout</span>

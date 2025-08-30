@@ -35,7 +35,7 @@ const DeleteConfirmation = ({
           size="sm"
           variant="ghost"
           className={cn(
-            "h-8 w-8 p-0 group relative overflow-hidden",
+            "h-8 w-8 p-0 group relative overflow-hidden cursor-pointer",
             "hover:bg-error/10 hover:text-error transition-all duration-200",
             "hover:scale-110 active:scale-95",
             "before:absolute before:inset-0 before:bg-error/20 before:rounded-full",

@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -70,14 +70,14 @@ class ErrorBoundary extends Component<Props, State> {
                 <Button 
                   onClick={this.handleReset} 
                   variant="outline" 
-                  className="flex-1"
+                  className="flex-1 cursor-pointer"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Coba Lagi
                 </Button>
                 <Button 
                   onClick={this.handleReload} 
-                  className="flex-1"
+                  className="flex-1 cursor-pointer"
                 >
                   Muat Ulang
                 </Button>

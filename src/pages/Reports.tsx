@@ -1,6 +1,6 @@
 import { FileText, Download, TrendingUp, Calculator, Settings, FileSpreadsheet, TrendingDown, DollarSign, Database, Loader2 } from "lucide-react";
-import { useState } from "react";
-import Navbar from "@/components/layout/Navbar";
+ import { useState } from "react";
+ import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AnimatedButton from "@/components/ui/animated-button";
@@ -503,7 +503,7 @@ const Reports = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => setShowKopDialog(false)}
-                  className="flex-1"
+                  className="flex-1 cursor-pointer"
                 >
                   Batal
                 </Button>
