@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Save, X, CheckCircle } from "lucide-react";
+import { Save, X, CheckCircle, Loader2 } from "lucide-react";
 import AnimatedButton from "@/components/ui/animated-button";
 import FileUpload from "@/components/ui/file-upload";
+import { useCreateTransaction, useTransactionCategories } from "@/hooks/useTransactions";
 
 interface TransactionFormProps {
   onSubmit?: (data: any) => void;
@@ -28,6 +29,9 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
     invoiceFile: initialData?.invoiceFile || null,
     taxInvoiceFile: initialData?.taxInvoiceFile || null,
   });
+  
+  const createTransactionMutation = useCreateTransaction();
+  const { data: categories, isLoading: categoriesLoading } = useTransactionCategories();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,33 +45,50 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
       return;
     }
 
-    setIsLoading(true);
+    const transactionData = {
+      date: formData.date,
+      description: formData.description,
+      category: formData.category,
+      type: formData.type as "income" | "expense",
+      amount: parseFloat(formData.amount),
+      invoiceFile: formData.invoiceFile,
+      taxInvoiceFile: formData.taxInvoiceFile,
+    };
     
-    // Simulate API call
-    setTimeout(() => {
-      onSubmit?.(formData);
-      
-      setIsSuccess(true);
-      toast({
-        title: "Berhasil!",
-        description: "Transaksi berhasil disimpan",
-      });
-
-      // Reset form after success animation
-      setTimeout(() => {
-        setFormData({
-          date: new Date().toISOString().split('T')[0],
-          description: "",
-          type: "",
-          category: "",
-          amount: "",
-          invoiceFile: null,
-          taxInvoiceFile: null,
+    createTransactionMutation.mutate(transactionData, {
+      onSuccess: () => {
+        setIsSuccess(true);
+        toast({
+          title: "Berhasil!",
+          description: "Transaksi berhasil disimpan",
         });
+
+        // Reset form after success animation
+        setTimeout(() => {
+          setFormData({
+            date: new Date().toISOString().split('T')[0],
+            description: "",
+            type: "",
+            category: "",
+            amount: "",
+            invoiceFile: null,
+            taxInvoiceFile: null,
+          });
+          setIsLoading(false);
+          setIsSuccess(false);
+        }, 1000);
+        
+        onSubmit?.(transactionData);
+      },
+      onError: () => {
         setIsLoading(false);
-        setIsSuccess(false);
-      }, 1000);
-    }, 1500);
+        toast({
+          title: "Error",
+          description: "Gagal menyimpan transaksi",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   return (
@@ -122,15 +143,27 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
               <Label htmlFor="category">Kategori</Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                 <SelectTrigger className="hover:border-primary/50 focus:border-primary transition-colors duration-200">
-                  <SelectValue placeholder="Pilih kategori" />
+                  <SelectValue placeholder={categoriesLoading ? "Memuat kategori..." : "Pilih kategori"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="penjualan">Penjualan</SelectItem>
-                  <SelectItem value="operasional">Operasional</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="gaji">Gaji & Tunjangan</SelectItem>
-                  <SelectItem value="pajak">Pajak</SelectItem>
-                  <SelectItem value="lainnya">Lainnya</SelectItem>
+                  {categoriesLoading ? (
+                    <SelectItem value="loading" disabled>
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Memuat...</span>
+                      </div>
+                    </SelectItem>
+                  ) : categories && categories.length > 0 ? (
+                    categories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-categories" disabled>
+                      Tidak ada kategori
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -190,10 +223,10 @@ const TransactionForm = ({ onSubmit, onCancel, initialData }: TransactionFormPro
               variant={isSuccess ? "success" : "gradient"}
               leftIcon={isSuccess ? CheckCircle : Save}
               animation={isSuccess ? "bounce" : "scale"}
-              isLoading={isLoading}
-              disabled={isLoading}
+              isLoading={createTransactionMutation.isPending}
+              disabled={createTransactionMutation.isPending}
             >
-              {isSuccess ? "Tersimpan!" : "Simpan Transaksi"}
+              {createTransactionMutation.isPending ? "Menyimpan..." : isSuccess ? "Tersimpan!" : "Simpan Transaksi"}
             </AnimatedButton>
           </div>
         </form>

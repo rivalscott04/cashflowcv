@@ -3,16 +3,6 @@ import TransactionForm from "@/components/transactions/TransactionForm";
 import TransactionTable from "@/components/transactions/TransactionTable";
 
 const Transactions = () => {
-  const handleSubmit = (data: any) => {
-    console.log("Transaction submitted:", data);
-    // Here you would typically save to your backend
-  };
-
-  const handleEdit = (transaction: any) => {
-    console.log("Edit transaction:", transaction);
-    // Here you would open an edit modal or navigate to edit page
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -24,8 +14,8 @@ const Transactions = () => {
         </div>
 
         <div className="space-y-8">
-          <TransactionForm onSubmit={handleSubmit} />
-          <TransactionTable onEdit={handleEdit} />
+          <TransactionForm />
+          <TransactionTable />
         </div>
       </div>
     </div>

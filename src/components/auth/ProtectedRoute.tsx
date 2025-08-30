@@ -36,7 +36,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // If user is authenticated but trying to access login page
   if (!requireAuth && isAuthenticated && location.pathname === '/login') {
     // Redirect to dashboard
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Render the protected component

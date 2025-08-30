@@ -21,7 +21,7 @@ const Login = () => {
   const { login } = useAuth();
   
   // Get the intended destination or default to dashboard
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,7 +55,7 @@ const Login = () => {
       // Login successful
       toast({
         title: "Login Berhasil",
-        description: "Selamat datang di Sasambo Solusi Digital"
+        description: "Selamat datang di CashTracker"
       });
       
       // Navigate to intended destination or dashboard
@@ -78,7 +78,7 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <BarChart3 className="h-10 w-10 text-primary" />
-            <span className="text-2xl font-bold text-foreground">Sasambo Solusi Digital</span>
+            <span className="text-2xl font-bold text-foreground">CashTracker</span>
           </div>
           <p className="text-muted-foreground">Masuk ke akun Anda</p>
         </div>
